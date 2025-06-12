@@ -1,2 +1,8 @@
-packages: 
-  - "packages/*"
+packages:
+  # Nossas aplicações
+  - 'api'
+  - 'ui'
+  - 'api-e2e'
+  - 'ui-e2e'
+  # Nossas bibliotecas (o '*' pega todas as que estiverem dentro de /libs)
+  - 'libs/*'
