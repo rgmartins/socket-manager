@@ -4,18 +4,18 @@ import { Injectable, OnApplicationBootstrap, Logger } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { ConnectionConfig } from '../../schemas/connection-config.schema';
+import { ConnectionHandler } from '../handlers/connection-handler'; // 1. IMPORTE AQUI
 
 @Injectable()
 export class ConnectionManagerService implements OnApplicationBootstrap {
   private readonly logger = new Logger(ConnectionManagerService.name);
+  private handlers = new Map<string, ConnectionHandler>(); // Para guardar nossos handlers
 
   constructor(
-    // 1. Injetamos o "Model" da nossa configuração para falar com o MongoDB
     @InjectModel(ConnectionConfig.name)
     private connectionConfigModel: Model<ConnectionConfig>,
   ) {}
 
-  // 2. Este método será executado automaticamente quando a aplicação iniciar
   async onApplicationBootstrap() {
     this.logger.log('Iniciando o ConnectionManagerService...');
 
@@ -31,8 +31,9 @@ export class ConnectionManagerService implements OnApplicationBootstrap {
     this.logger.log(`Encontradas ${activeConnections.length} conexões ativas para iniciar.`);
 
     for (const config of activeConnections) {
-      this.logger.log(`Processando configuração para a conexão: ${config.connectionId}`);
-      // Futuramente, aqui chamaremos a lógica para iniciar o socket para esta config.
+      // 2. CRIE UMA NOVA INSTÂNCIA DO HANDLER PARA CADA CONFIG
+      const handler = new ConnectionHandler(config);
+      this.handlers.set(config.connectionId, handler);
     }
   }
 }
