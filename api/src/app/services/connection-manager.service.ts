@@ -4,12 +4,12 @@ import { Injectable, OnApplicationBootstrap, Logger } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { ConnectionConfig } from '../../schemas/connection-config.schema';
-import { ConnectionHandler } from '../handlers/connection-handler'; // 1. IMPORTE AQUI
+import { ConnectionHandler } from '../handlers/connection-handler';
 
 @Injectable()
 export class ConnectionManagerService implements OnApplicationBootstrap {
   private readonly logger = new Logger(ConnectionManagerService.name);
-  private handlers = new Map<string, ConnectionHandler>(); // Para guardar nossos handlers
+  private handlers = new Map<string, ConnectionHandler>();
 
   constructor(
     @InjectModel(ConnectionConfig.name)
@@ -24,16 +24,21 @@ export class ConnectionManagerService implements OnApplicationBootstrap {
       .exec();
 
     if (activeConnections.length === 0) {
-      this.logger.warn('Nenhuma configuração de conexão ativa encontrada no banco de dados.');
+      this.logger.warn(
+        'Nenhuma configuração de conexão ativa encontrada no banco de dados.',
+      );
       return;
     }
 
-    this.logger.log(`Encontradas ${activeConnections.length} conexões ativas para iniciar.`);
+    this.logger.log(
+      `Encontradas ${activeConnections.length} conexões ativas para iniciar.`,
+    );
 
     for (const config of activeConnections) {
-      // 2. CRIE UMA NOVA INSTÂNCIA DO HANDLER PARA CADA CONFIG
       const handler = new ConnectionHandler(config);
+      handler.start();
       this.handlers.set(config.connectionId, handler);
     }
+
   }
 }
