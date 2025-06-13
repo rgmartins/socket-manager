@@ -1,5 +1,5 @@
 // Em api/src/app/services/connection-manager.service.ts
-
+// VERSÃO SIMPLIFICADA
 import { Injectable, OnApplicationBootstrap, Logger } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
@@ -9,7 +9,7 @@ import { ConnectionHandler } from '../handlers/connection-handler';
 @Injectable()
 export class ConnectionManagerService implements OnApplicationBootstrap {
   private readonly logger = new Logger(ConnectionManagerService.name);
-  private handlers = new Map<string, ConnectionHandler>();
+  public handlers = new Map<string, ConnectionHandler>(); // Deixamos público para o outro serviço acessar
 
   constructor(
     @InjectModel(ConnectionConfig.name)
@@ -18,27 +18,15 @@ export class ConnectionManagerService implements OnApplicationBootstrap {
 
   async onApplicationBootstrap() {
     this.logger.log('Iniciando o ConnectionManagerService...');
-
     const activeConnections = await this.connectionConfigModel
       .find({ enabled: true })
       .exec();
-
-    if (activeConnections.length === 0) {
-      this.logger.warn(
-        'Nenhuma configuração de conexão ativa encontrada no banco de dados.',
-      );
-      return;
-    }
-
-    this.logger.log(
-      `Encontradas ${activeConnections.length} conexões ativas para iniciar.`,
-    );
-
+    // ...
+    this.logger.log(`Encontradas ${activeConnections.length} conexões ativas para iniciar.`);
     for (const config of activeConnections) {
-      const handler = new ConnectionHandler(config);
+      const handler = new ConnectionHandler(config); // Não precisa mais do amqpConnection
       handler.start();
       this.handlers.set(config.connectionId, handler);
     }
-
   }
 }

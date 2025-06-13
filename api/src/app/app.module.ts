@@ -5,18 +5,16 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { RabbitMQModule } from '@golevelup/nestjs-rabbitmq';
 import { ConnectionManagerService } from './services/connection-manager.service';
 import { ConnectionConfig, ConnectionConfigSchema } from '../schemas/connection-config.schema';
+import { QueueHandlerService } from './services/queue-handler.service'; // 1. IMPORTE O NOVO SERVIÇO
 
 @Module({
   imports: [
     MongooseModule.forRoot(
       'mongodb://localhost:27017/socket_manager_config',
     ),
-
-    // Registra o nosso "molde" de configuração para ser usado no serviço
     MongooseModule.forFeature([
       { name: ConnectionConfig.name, schema: ConnectionConfigSchema },
     ]),
-
     RabbitMQModule.forRoot({
       exchanges: [
         {
@@ -28,7 +26,8 @@ import { ConnectionConfig, ConnectionConfigSchema } from '../schemas/connection-
       connectionInitOptions: { wait: false },
     }),
   ],
-  controllers: [], // Removemos o AppController
-  providers: [ConnectionManagerService], // Adicionamos nosso novo serviço
+  controllers: [],
+  // 2. ADICIONE O NOVO SERVIÇO À LISTA
+  providers: [ConnectionManagerService, QueueHandlerService],   
 })
 export class AppModule {}
