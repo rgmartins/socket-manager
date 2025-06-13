@@ -5,7 +5,7 @@ import { HydratedDocument, Schema as MongooseSchema } from 'mongoose';
 
 export type ConnectionConfigDocument = HydratedDocument<ConnectionConfig>;
 
-@Schema({ timestamps: true }) // `timestamps` adiciona os campos createdAt e updatedAt automaticamente
+@Schema({ timestamps: true })
 export class ConnectionConfig {
   @Prop({ required: true, unique: true, trim: true })
   connectionId!: string;
@@ -17,18 +17,17 @@ export class ConnectionConfig {
   connectionType!: string;
 
   @Prop({ trim: true })
-  host?: string; // O '?' torna o campo opcional (necessário para o tipo 'server')
+  host?: string;
 
   @Prop({ required: true })
   port!: number;
 
-  @Prop({ required: true, trim: true })
-  sendQueue!: string;
+  // CAMPO NOVO:
+  @Prop({ required: true, unique: true, trim: true })
+  queueBaseName!: string;
 
-  @Prop({ required: true, trim: true })
-  receiveQueue!: string;
+  // CAMPOS REMOVIDOS: sendQueue e receiveQueue
 
-  // Um campo flexível para guardar configurações extras no futuro
   @Prop({ type: MongooseSchema.Types.Mixed })
   options?: Record<string, any>;
 }
