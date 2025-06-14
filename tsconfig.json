@@ -14,6 +14,12 @@
     },
     {
       "path": "./ui"
+    },
+    {
+      "path": "./test-consumer-e2e"
+    },
+    {
+      "path": "./test-consumer"
     }
   ]
 }
