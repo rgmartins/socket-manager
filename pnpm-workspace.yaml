@@ -6,3 +6,5 @@ packages:
   - 'libs/*'
   - 'test-consumer'
   - 'test-consumer-e2e'
+  - 'libs'
+  - 'logger'

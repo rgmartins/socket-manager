@@ -3,7 +3,8 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import * as net from 'net';
 import { AmqpConnection } from '@golevelup/nestjs-rabbitmq';
-import { ILogger } from '../core/logging/logger.interface';
+import { Logger as WinstonLogger } from 'winston';
+import { WINSTON_LOGGER_TOKEN } from '@socket-manager/logger';
 import {
   ConnectionConfig,
   ConnectionConfigDocument,
@@ -14,7 +15,7 @@ export class ConnectionManagerService implements OnModuleInit {
   private connections: Map<string, net.Socket> = new Map();
 
   constructor(
-    @Inject(ILogger) private readonly logger: ILogger,
+    @Inject(WINSTON_LOGGER_TOKEN) private readonly logger: WinstonLogger,
     @InjectModel(ConnectionConfig.name)
     private readonly connectionConfigModel: Model<ConnectionConfigDocument>,
     private readonly amqpConnection: AmqpConnection,

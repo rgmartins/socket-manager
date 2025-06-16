@@ -20,6 +20,12 @@
     },
     {
       "path": "./test-consumer"
+    },
+    {
+      "path": "./logger"
+    },
+    {
+      "path": "./logger"
     }
   ]
 }

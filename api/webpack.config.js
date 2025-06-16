@@ -1,9 +1,18 @@
 const { NxAppWebpackPlugin } = require('@nx/webpack/app-plugin');
-const { join } = require('path');
+const path = require('path'); // <-- Usaremos o módulo 'path'
+const TsconfigPathsPlugin = require('tsconfig-paths-webpack-plugin');
 
 module.exports = {
   output: {
-    path: join(__dirname, 'dist'),
+    path: path.join(__dirname, 'dist'),
+  },
+  resolve: {
+    plugins: [
+      new TsconfigPathsPlugin({
+        // MUDANÇA PRINCIPAL AQUI: Criando um caminho absoluto e sem erros
+        configFile: path.resolve(__dirname, '..', 'tsconfig.base.json'),
+      }),
+    ],
   },
   plugins: [
     new NxAppWebpackPlugin({

@@ -55,15 +55,20 @@ services:
     networks:
       - app-net
 
-  # SERVIÇO FILEBEAT
+# SERVIÇO FILEBEAT
   filebeat:
     image: docker.elastic.co/beats/filebeat:8.14.0
     container_name: filebeat
     command: -e -d "*" --strict.perms=false
+    # ADIÇÃO: Permissão para o Filebeat acessar o Docker
+    user: root 
     volumes:
       - ./filebeat/filebeat.yml:/usr/share/filebeat/filebeat.yml:ro
       - ./logs:/usr/share/filebeat/logs
-    # CORREÇÃO: Altera o depends_on para esperar que o Logstash fique saudável
+      # ADIÇÃO: Mapeia os logs dos contêineres Docker
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro 
+      # ADIÇÃO: Mapeia o "soquete" do Docker para que o Filebeat possa obter metadados
+      - /var/run/docker.sock:/var/run/docker.sock:ro 
     depends_on:
       logstash:
         condition: service_healthy

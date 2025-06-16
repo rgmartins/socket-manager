@@ -7,7 +7,7 @@ import { ConnectionManagerService } from './services/connection-manager.service'
 import { ConnectionConfig, ConnectionConfigSchema } from '../schemas/connection-config.schema';
 import { QueueHandlerService } from './services/queue-handler.service';
 // 1. Importe o nosso módulo a partir do caminho correto
-import { LoggerModule } from './core/logging/logger.module'; 
+import { LoggerModule } from '@socket-manager/logger';
 
 @Module({
   imports: [
