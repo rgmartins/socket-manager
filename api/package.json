@@ -46,5 +46,9 @@
         }
       }
     }
+  },
+  "dependencies": {
+    "winston": "^3.17.0",
+    "winston-logstash-transport": "^2.0.0"
   }
 }

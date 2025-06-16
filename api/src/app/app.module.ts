@@ -5,10 +5,13 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { RabbitMQModule } from '@golevelup/nestjs-rabbitmq';
 import { ConnectionManagerService } from './services/connection-manager.service';
 import { ConnectionConfig, ConnectionConfigSchema } from '../schemas/connection-config.schema';
-import { QueueHandlerService } from './services/queue-handler.service'; // 1. IMPORTE O NOVO SERVIÇO
+import { QueueHandlerService } from './services/queue-handler.service';
+// 1. Importe o nosso módulo a partir do caminho correto
+import { LoggerModule } from './core/logging/logger.module'; 
 
 @Module({
   imports: [
+    LoggerModule, // 2. Adicione o LoggerModule à lista de imports
     MongooseModule.forRoot(
       'mongodb://localhost:27017/socket_manager_config',
     ),
@@ -27,7 +30,6 @@ import { QueueHandlerService } from './services/queue-handler.service'; // 1. IM
     }),
   ],
   controllers: [],
-  // 2. ADICIONE O NOVO SERVIÇO À LISTA
-  providers: [ConnectionManagerService, QueueHandlerService],   
+  providers: [ConnectionManagerService, QueueHandlerService],
 })
 export class AppModule {}

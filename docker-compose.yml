@@ -1,7 +1,6 @@
 version: '3.8' 
 
 services:
-  # Seu serviço MongoDB existente...
   mongodb:
     image: mongo
     container_name: mongodb
@@ -12,7 +11,6 @@ services:
     networks:
       - app-net
 
-  # Seu serviço RabbitMQ existente...
   rabbitmq:
     image: rabbitmq:3-management
     container_name: rabbitmq
@@ -25,59 +23,71 @@ services:
     networks:
       - app-net
 
-  # Serviço Elasticsearch para logs
   elasticsearch:
     image: docker.elastic.co/elasticsearch/elasticsearch:8.14.0
     container_name: elasticsearch
     environment:
       - discovery.type=single-node
-      - xpack.security.enabled=false # Desativa a segurança para desenvolvimento local
-      - "ES_JAVA_OPTS=-Xms512m -Xmx512m" # Limita o uso de memória
+      - xpack.security.enabled=false
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
     ports:
       - "9200:9200"
-      - "9300:9300"
     volumes:
       - es_data:/usr/share/elasticsearch/data
     networks:
       - app-net
 
-  # Serviço Logstash para processar e enviar os logs
   logstash:
     image: docker.elastic.co/logstash/logstash:8.14.0
     container_name: logstash
     volumes:
-      # Mapeia o diretório local com o arquivo de configuração do pipeline
       - ./logstash/pipeline:/usr/share/logstash/pipeline:ro
     ports:
-      # Porta para receber os logs da sua aplicação via TCP
-      - "5000:5000/tcp"
-      - "5000:5000/udp"
+      - "5044:5044" 
+    # CORREÇÃO: Adiciona uma verificação de saúde para garantir que o Logstash está pronto
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9600"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
     depends_on:
       - elasticsearch
     networks:
       - app-net
 
-  # Serviço Kibana para visualização dos logs
+  # SERVIÇO FILEBEAT
+  filebeat:
+    image: docker.elastic.co/beats/filebeat:8.14.0
+    container_name: filebeat
+    command: -e -d "*" --strict.perms=false
+    volumes:
+      - ./filebeat/filebeat.yml:/usr/share/filebeat/filebeat.yml:ro
+      - ./logs:/usr/share/filebeat/logs
+    # CORREÇÃO: Altera o depends_on para esperar que o Logstash fique saudável
+    depends_on:
+      logstash:
+        condition: service_healthy
+    networks:
+      - app-net
+
   kibana:
     image: docker.elastic.co/kibana/kibana:8.14.0
     container_name: kibana
     environment:
-      # O Kibana se conecta ao Elasticsearch usando o nome do serviço da rede Docker
       - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
     ports:
       - "5601:5601"
     depends_on:
-      - elasticsearch
+      elasticsearch:
+        condition: service_started
     networks:
       - app-net
 
-# Volumes para persistência de dados
 volumes:
   mongo-data:
   es_data:
     driver: local
 
-# Rede comum para permitir que os contêineres se comuniquem
 networks:
   app-net:
     driver: bridge
