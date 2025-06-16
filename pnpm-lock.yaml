@@ -234,7 +234,11 @@ importers:
         specifier: ^3.17.0
         version: 3.17.0
 
-  test-consumer: {}
+  test-consumer:
+    devDependencies:
+      winston:
+        specifier: ^3.17.0
+        version: 3.17.0
 
   test-consumer-e2e: {}
 

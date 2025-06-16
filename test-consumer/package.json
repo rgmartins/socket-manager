@@ -46,5 +46,8 @@
         }
       }
     }
+  },
+  "devDependencies": {
+    "winston": "^3.17.0"
   }
 }

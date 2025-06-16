@@ -1,11 +1,14 @@
 // Em test-consumer/src/app/app.module.ts
 
 import { Module } from '@nestjs/common';
+import { LoggerModule } from '@socket-manager/logger'; // <-- 1. IMPORTE AQUI
 import { RabbitMQModule } from '@golevelup/nestjs-rabbitmq';
 import { AppService } from './app.service';
 
+
 @Module({
   imports: [
+    LoggerModule, // <-- 2. ADICIONE AQUI
     RabbitMQModule.forRoot({
       exchanges: [
         {

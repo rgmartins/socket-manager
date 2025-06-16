@@ -1,22 +1,26 @@
 // Em test-consumer/src/app/app.service.ts
 
-import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
+import { Inject, Injectable, OnModuleInit } from '@nestjs/common';
 import { AmqpConnection } from '@golevelup/nestjs-rabbitmq';
 import type { ConsumeMessage } from 'amqplib';
+import { Logger as WinstonLogger } from 'winston';
+import { WINSTON_LOGGER_TOKEN } from '@socket-manager/logger';
 
 @Injectable()
 export class AppService implements OnModuleInit {
-  private readonly logger = new Logger(AppService.name);
 
-  constructor(private readonly amqpConnection: AmqpConnection) {}
+  constructor(
+    @Inject(WINSTON_LOGGER_TOKEN) private readonly logger: WinstonLogger,
+    private readonly amqpConnection: AmqpConnection
+  ) { }
 
   // Usamos o OnModuleInit para agendar a configuração
   async onModuleInit() {
-    this.logger.log('Hook executado. Agendando setup de consumidor para daqui a 1 segundo...');
+
 
     // A SOLUÇÃO PRAGMÁTICA (a mesma da api)
     setTimeout(() => {
-      this.logger.log('Timeout finalizado. Configurando consumidor do test-consumer.');
+      this.logger.info('Timeout finalizado. Configurando consumidor do test-consumer.');
       this.setupConsumer();
     }, 1000); // 1 segundo de espera é mais que suficiente
   }
@@ -32,7 +36,7 @@ export class AppService implements OnModuleInit {
       await channel.assertQueue(queue, { durable: true });
       await channel.bindQueue(queue, exchange, routingKey);
 
-      this.logger.log(`Iniciando consumo da fila "${queue}"`);
+      this.logger.info(`Iniciando consumo da fila "${queue}"`);
 
       channel.consume(queue, (msg: ConsumeMessage | null) => {
         if (msg) {
@@ -47,7 +51,7 @@ export class AppService implements OnModuleInit {
 
   // O método que de fato processa a mensagem
   public handleReceivedMessage(msg: Buffer) {
-    this.logger.log('🏆🏆🏆 MENSAGEM FINAL RECEBIDA PELA FILA! 🏆🏆🏆');
-    this.logger.log(`Conteúdo como string: "${msg.toString()}"`);
+    this.logger.info('🏆🏆🏆 MENSAGEM FINAL RECEBIDA PELA FILA! 🏆🏆🏆');
+    this.logger.info(`Conteúdo como string: "${msg.toString()}"`);
   }
 }
