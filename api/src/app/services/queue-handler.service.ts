@@ -19,12 +19,12 @@ export class QueueHandlerService implements OnApplicationBootstrap {
   // Voltamos a usar o OnApplicationBootstrap
   async onApplicationBootstrap() {
     this.logger.log(
-      'Hook executado. Agendando setup de consumidores para daqui a 3 segundos...',
+      'QueueHandlerService Hook executado. Agendando setup de consumidores para daqui a 3 segundos...',
     );
 
     // A abordagem pragmática: esperamos 3 segundos para garantir que tudo do RabbitMQ esteja pronto.
     setTimeout(() => {
-      this.logger.log('Timeout finalizado. Executando setup de consumidores.');
+      this.logger.log('QueueHandlerService Timeout finalizado. Executando setup de consumidores.');
       this.setupConsumers();
     }, 3000); // 3000 milissegundos = 3 segundos
   }
@@ -41,7 +41,7 @@ export class QueueHandlerService implements OnApplicationBootstrap {
       await channel.bindQueue(queue, exchange, routingKey);
 
       this.logger.log(
-        `Iniciando consumo da fila "${queue}" com a rota "${routingKey}"`,
+        `QueueHandlerService Iniciando consumo da fila "${queue}" com a rota "${routingKey}"`,
       );
 
       channel.consume(queue, (msg: ConsumeMessage | null) => {
@@ -52,14 +52,14 @@ export class QueueHandlerService implements OnApplicationBootstrap {
       });
     } catch (err) {
       // O 'any' aqui corrige o segundo erro que você reportou.
-      this.logger.error('Falha ao configurar consumidor', err as any);
+      this.logger.error('QueueHandlerService Falha ao configurar consumidor', err as any);
     }
   }
 
   public handleOutgoing(amqpMsg: ConsumeMessage) {
     const routingKey = amqpMsg.fields.routingKey;
     this.logger.log(
-      `[handleOutgoing] Mensagem recebida com a chave: ${routingKey}`,
+      `QueueHandlerService [handleOutgoing] Mensagem recebida com a chave: ${routingKey}`,
     );
 
     const connectionId = routingKey.replace('.send', '');
@@ -69,7 +69,7 @@ export class QueueHandlerService implements OnApplicationBootstrap {
       handler.sendMessage(amqpMsg.content);
     } else {
       this.logger.warn(
-        `[handleOutgoing] Nenhum handler ativo para a chave: ${routingKey}`,
+        `QueueHandlerService [handleOutgoing] Nenhum handler ativo para a chave: ${routingKey}`,
       );
     }
   }

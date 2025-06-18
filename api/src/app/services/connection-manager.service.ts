@@ -36,14 +36,14 @@ export class ConnectionManagerService implements OnModuleInit {
         .find({ is_active: true })
         .exec();
       this.logger.info(
-        `Encontradas ${configs.length} configurações ativas para conectar.`,
+        `ConnectionManagerService Encontradas ${configs.length} configurações ativas para conectar.`,
       );
       for (const config of configs) {
         this.createConnection(config);
       }
     } catch (error) {
       this.logger.error(
-        'Falha ao carregar as configurações de conexão do MongoDB.',
+        'ConnectionManagerService Falha ao carregar as configurações de conexão do MongoDB.',
         {
           errorMessage: error instanceof Error ? error.message : String(error),
           stack: error instanceof Error ? error.stack : undefined,
@@ -59,7 +59,7 @@ export class ConnectionManagerService implements OnModuleInit {
 
     if (!host || !port || !routing_key) {
       this.logger.error(
-        `Configuração de conexão ${connectionId} inválida. Host, porta ou routing_key em falta.`,
+        `ConnectionManagerService Configuração de conexão ${connectionId} inválida. Host, porta ou routing_key em falta.`,
         { config: config.toObject() },
       );
       return;
@@ -67,17 +67,17 @@ export class ConnectionManagerService implements OnModuleInit {
 
     if (this.handlers.has(connectionId)) {
       this.logger.warn(
-        `A conexão para o ID de configuração ${connectionId} já existe.`,
+        `ConnectionManagerService A conexão para o ID de configuração ${connectionId} já existe.`,
         { host, port },
       );
       return;
     }
 
-    this.logger.info(`A tentar conectar a ${host}:${port}`, { connectionId });
+    this.logger.info(` ConnectionManagerService A tentar conectar a ${host}:${port}`, { connectionId });
     const client = new net.Socket();
 
     client.connect(port, host, () => {
-      this.logger.info(`Conectado com sucesso a ${host}:${port}`, {
+      this.logger.info(`ConnectionManagerService Conectado com sucesso a ${host}:${port}`, {
         connectionId,
       });
       this.handlers.set(connectionId, {
@@ -88,7 +88,7 @@ export class ConnectionManagerService implements OnModuleInit {
     });
 
     client.on('data', (data) => {
-      this.logger.debug(`Dados recebidos de ${host}:${port}`, {
+      this.logger.debug(`ConnectionManagerService Dados recebidos de ${host}:${port}`, {
         connectionId,
         dataSize: data.length,
       });
@@ -96,13 +96,13 @@ export class ConnectionManagerService implements OnModuleInit {
     });
 
     client.on('close', () => {
-      this.logger.warn(`Conexão fechada para ${host}:${port}`, { connectionId });
+      this.logger.warn(`ConnectionManagerService Conexão fechada para ${host}:${port}`, { connectionId });
       this.handlers.delete(connectionId);
       setTimeout(() => this.createConnection(config), 5000);
     });
 
     client.on('error', (error) => {
-      this.logger.error(`Erro de conexão para ${host}:${port}`, {
+      this.logger.error(`ConnectionManagerService Erro de conexão para ${host}:${port}`, {
         connectionId,
         errorMessage: error.message,
         stack: error.stack,
@@ -112,12 +112,12 @@ export class ConnectionManagerService implements OnModuleInit {
 
   private publishToQueue(routingKey: string, data: Buffer) {
     try {
-      this.amqpConnection.publish('socket-exchange', routingKey, data);
+      this.amqpConnection.publish('ConnectionManagerService socket-exchange', routingKey, data);
       this.logger.info(
-        `Mensagem publicada no RabbitMQ com a routing key: ${routingKey}`,
+        `ConnectionManagerService Mensagem publicada no RabbitMQ com a routing key: ${routingKey}`,
       );
     } catch (error) {
-      this.logger.error('Falha ao publicar mensagem no RabbitMQ.', {
+      this.logger.error('ConnectionManagerService Falha ao publicar mensagem no RabbitMQ.', {
         routingKey,
         errorMessage: error instanceof Error ? error.message : String(error),
         stack: error instanceof Error ? error.stack : undefined,
