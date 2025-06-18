@@ -21,7 +21,7 @@ export class ConnectionManagerService implements OnModuleInit {
     @InjectModel(ConnectionConfig.name)
     private readonly connectionConfigModel: Model<ConnectionConfigDocument>,
     private readonly amqpConnection: AmqpConnection,
-  ) {}
+  ) { }
 
   async onModuleInit() {
     this.logger.info(
@@ -33,7 +33,7 @@ export class ConnectionManagerService implements OnModuleInit {
   private async loadAndInitiateConnections() {
     try {
       const configs = await this.connectionConfigModel
-        .find({ is_active: true })
+        .find({ enabled: true })
         .exec();
       this.logger.info(
         `ConnectionManagerService Encontradas ${configs.length} configurações ativas para conectar.`,
