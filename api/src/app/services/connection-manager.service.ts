@@ -56,6 +56,7 @@ export class ConnectionManagerService implements OnModuleInit {
     const { _id, host, port } = config;
     const routing_key = (config as any).routing_key;
     const connectionId = _id.toString();
+    this.logger.error(`ConnectionManagerService => host ${config.host} | porta ${config.port} | routing_key ${routing_key}`);
 
     if (!host || !port || !routing_key) {
       this.logger.error(
