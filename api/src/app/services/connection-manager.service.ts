@@ -1,10 +1,11 @@
+// Em api/src/app/services/connection-manager.service.ts
 import { Inject, Injectable, OnModuleInit } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import * as net from 'net';
 import { AmqpConnection } from '@golevelup/nestjs-rabbitmq';
 import { Logger as WinstonLogger } from 'winston';
-import { WINSTON_LOGGER_TOKEN } from '@socket-manager/logger';
+import { WINSTON_LOGGER_TOKEN } from '../../../../logger';
 import {
   ConnectionConfig,
   ConnectionConfigDocument,
@@ -12,7 +13,8 @@ import {
 
 @Injectable()
 export class ConnectionManagerService implements OnModuleInit {
-  private connections: Map<string, net.Socket> = new Map();
+  // Inicialize a propriedade 'handlers' diretamente aqui
+  private handlers: Map<string, { sendMessage: (data: Buffer) => void }> = new Map();
 
   constructor(
     @Inject(WINSTON_LOGGER_TOKEN) private readonly logger: WinstonLogger,
@@ -51,16 +53,10 @@ export class ConnectionManagerService implements OnModuleInit {
   }
 
   private createConnection(config: ConnectionConfigDocument) {
-    // Destrutura as propriedades que o TypeScript já conhece
     const { _id, host, port } = config;
-    // NOTA: Acessamos `routing_key` desta forma para evitar um erro de compilação.
-    // A solução ideal a longo prazo é garantir que a propriedade `routing_key`
-    // está corretamente definida com o decorador `@Prop()` no seu ficheiro
-    // `connection-config.schema.ts`.
     const routing_key = (config as any).routing_key;
     const connectionId = _id.toString();
 
-    // Verificação de segurança para garantir que os dados essenciais existem
     if (!host || !port || !routing_key) {
       this.logger.error(
         `Configuração de conexão ${connectionId} inválida. Host, porta ou routing_key em falta.`,
@@ -69,7 +65,7 @@ export class ConnectionManagerService implements OnModuleInit {
       return;
     }
 
-    if (this.connections.has(connectionId)) {
+    if (this.handlers.has(connectionId)) {
       this.logger.warn(
         `A conexão para o ID de configuração ${connectionId} já existe.`,
         { host, port },
@@ -84,7 +80,11 @@ export class ConnectionManagerService implements OnModuleInit {
       this.logger.info(`Conectado com sucesso a ${host}:${port}`, {
         connectionId,
       });
-      this.connections.set(connectionId, client);
+      this.handlers.set(connectionId, {
+        sendMessage: (data: Buffer) => {
+          client.write(data);
+        },
+      });
     });
 
     client.on('data', (data) => {
@@ -97,7 +97,7 @@ export class ConnectionManagerService implements OnModuleInit {
 
     client.on('close', () => {
       this.logger.warn(`Conexão fechada para ${host}:${port}`, { connectionId });
-      this.connections.delete(connectionId);
+      this.handlers.delete(connectionId);
       setTimeout(() => this.createConnection(config), 5000);
     });
 
@@ -123,5 +123,9 @@ export class ConnectionManagerService implements OnModuleInit {
         stack: error instanceof Error ? error.stack : undefined,
       });
     }
+  }
+
+  public getHandlers() {
+    return this.handlers;
   }
 }

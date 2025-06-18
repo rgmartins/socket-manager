@@ -63,7 +63,7 @@ export class QueueHandlerService implements OnApplicationBootstrap {
     );
 
     const connectionId = routingKey.replace('.send', '');
-    const handler = this.connectionManager.handlers.get(connectionId);
+    const handler = this.connectionManager.getHandlers().get(connectionId);
 
     if (handler) {
       handler.sendMessage(amqpMsg.content);
@@ -73,4 +73,5 @@ export class QueueHandlerService implements OnApplicationBootstrap {
       );
     }
   }
+
 }
