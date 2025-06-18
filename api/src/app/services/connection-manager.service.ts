@@ -53,14 +53,13 @@ export class ConnectionManagerService implements OnModuleInit {
   }
 
   private createConnection(config: ConnectionConfigDocument) {
-    const { _id, host, port } = config;
-    const routing_key = (config as any).routing_key;
+    const { _id, host, port, queueBaseName } = config;
     const connectionId = _id.toString();
-    this.logger.error(`ConnectionManagerService => host ${config.host} | porta ${config.port} | routing_key ${routing_key}`);
+    this.logger.error(`ConnectionManagerService => host ${config.host} | porta ${config.port} | queueBaseName ${queueBaseName}`);
 
-    if (!host || !port || !routing_key) {
+    if (!host || !port || !queueBaseName) {
       this.logger.error(
-        `ConnectionManagerService Configuração de conexão ${connectionId} inválida. Host, porta ou routing_key em falta.`,
+        `ConnectionManagerService Configuração de conexão ${connectionId} inválida. Host, porta ou queueBaseName em falta.`,
         { config: config.toObject() },
       );
       return;
@@ -93,7 +92,7 @@ export class ConnectionManagerService implements OnModuleInit {
         connectionId,
         dataSize: data.length,
       });
-      this.publishToQueue(routing_key, data);
+      this.publishToQueue(queueBaseName, data);
     });
 
     client.on('close', () => {
