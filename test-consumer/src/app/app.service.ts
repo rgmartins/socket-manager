@@ -40,6 +40,9 @@ export class AppService implements OnModuleInit {
 
       channel.consume(queue, (msg: ConsumeMessage | null) => {
         if (msg) {
+           this.logger.error(
+            `QueueHandlerService consumiu a fila *.receive "${queue}" com a rota "${routingKey}" com os dados: "${msg.content}"`,
+          );
           this.handleReceivedMessage(msg.content);
           channel.ack(msg);
         }
