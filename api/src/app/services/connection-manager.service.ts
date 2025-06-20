@@ -115,26 +115,6 @@ export class ConnectionManagerService implements OnModuleInit {
     // para simplificar e seguir o design atual.
   }
 
-  // O método `publishToQueue` permanece igual
-  private publishToQueue(routingKey: string, data: Buffer) {
-    try {
-      this.amqpConnection.publish(
-        'socket-exchange',
-        routingKey,
-        data,
-      );
-      this.logger.info(
-        `ConnectionManagerService Mensagem publicada no RabbitMQ com a routing key: ${routingKey}`,
-      );
-    } catch (error) {
-      this.logger.error('ConnectionManagerService Falha ao publicar mensagem no RabbitMQ.', {
-        routingKey,
-        errorMessage: error instanceof Error ? error.message : String(error),
-        stack: error instanceof Error ? error.stack : undefined,
-      });
-    }
-  }
-
   // O método getHandlers agora retornará instâncias de ConnectionHandler
   public getHandlers(): Map<string, ConnectionHandler> {
     return this.handlers;
