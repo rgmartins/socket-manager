@@ -20,7 +20,7 @@ export class AppService implements OnModuleInit {
 
     // A SOLUÇÃO PRAGMÁTICA (a mesma da api)
     setTimeout(() => {
-      this.logger.info('Timeout finalizado. Configurando consumidor do test-consumer.');
+      this.logger.info('AppService Timeout finalizado. Configurando consumidor do test-consumer.');
       this.setupConsumer();
     }, 1000); // 1 segundo de espera é mais que suficiente
   }
@@ -36,25 +36,25 @@ export class AppService implements OnModuleInit {
       await channel.assertQueue(queue, { durable: true });
       await channel.bindQueue(queue, exchange, routingKey);
 
-      this.logger.info(`Iniciando consumo da fila "${queue}"`);
+      this.logger.info(`AppService Iniciando consumo da fila "${queue}"`);
 
       channel.consume(queue, (msg: ConsumeMessage | null) => {
         if (msg) {
            this.logger.error(
-            `QueueHandlerService consumiu a fila *.receive "${queue}" com a rota "${routingKey}" com os dados: "${msg.content}"`,
+            `AppService consumiu a fila *.receive "${queue}" com a rota "${routingKey}" com os dados: "${msg.content}"`,
           );
           this.handleReceivedMessage(msg.content);
           channel.ack(msg);
         }
       });
     } catch (err) {
-      this.logger.error('Falha ao configurar consumidor', err as any);
+      this.logger.error('AppServiceFalha ao configurar consumidor', err as any);
     }
   }
 
   // O método que de fato processa a mensagem
   public handleReceivedMessage(msg: Buffer) {
-    this.logger.info('🏆🏆🏆 MENSAGEM FINAL RECEBIDA PELA FILA! 🏆🏆🏆');
-    this.logger.info(`Conteúdo como string: "${msg.toString()}"`);
+    this.logger.info('AppService 🏆🏆🏆 MENSAGEM FINAL RECEBIDA PELA FILA! 🏆🏆🏆');
+    this.logger.info(`AppService Conteúdo como string: "${msg.toString()}"`);
   }
 }
