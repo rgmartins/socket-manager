@@ -45,7 +45,14 @@ export class QueueHandlerService implements OnApplicationBootstrap {
       );
 
       channel.consume(queue, (msg: ConsumeMessage | null) => {
+        console.log('vai consumir *.send')
         if (msg) {
+          this.logger.error(
+            `QueueHandlerService consumiu a fila *.send "${queue}" com a rota "${routingKey}" com os dados: "${msg.content}"`,
+          );
+          this.logger.log(
+            `********************************************************************************************************`,
+          );
           this.handleOutgoing(msg);
           channel.ack(msg);
         }
